@@ -73,4 +73,71 @@ public class UserService {
         }
         return "fail";
     }
+
+    public Users updateProfile(String currentUsername, Users updatedData) {
+        Users current = repo.findByUsername(currentUsername);
+        if (current == null) {
+            throw new RuntimeException("User not found");
+        }
+        
+        if (!current.getUsername().equals(updatedData.getUsername())) {
+            if (repo.existsByUsername(updatedData.getUsername())) {
+                throw new RuntimeException("Username is already taken");
+            }
+            current.setUsername(updatedData.getUsername());
+        }
+        
+        if (updatedData.getEmail() != null && !updatedData.getEmail().isEmpty() && !updatedData.getEmail().equalsIgnoreCase(current.getEmail())) {
+            if (repo.existsByEmail(updatedData.getEmail())) {
+                throw new RuntimeException("Email is already taken");
+            }
+            current.setEmail(updatedData.getEmail());
+        }
+        
+        current.setPhoneNumber(updatedData.getPhoneNumber());
+        
+        if (updatedData.getPassword() != null && !updatedData.getPassword().isEmpty()) {
+            current.setPassword(encoder.encode(updatedData.getPassword()));
+        }
+        
+        return repo.save(current);
+    }
+
+    public Users adminUpdateUser(int id, Users updatedData) {
+        Optional<Users> optionalUser = repo.findById(id);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+        Users current = optionalUser.get();
+        
+        if (!current.getUsername().equals(updatedData.getUsername())) {
+            if (repo.existsByUsername(updatedData.getUsername())) {
+                throw new RuntimeException("Username is already taken");
+            }
+            current.setUsername(updatedData.getUsername());
+        }
+        
+        if (updatedData.getEmail() != null && !updatedData.getEmail().isEmpty() && !updatedData.getEmail().equalsIgnoreCase(current.getEmail())) {
+            if (repo.existsByEmail(updatedData.getEmail())) {
+                throw new RuntimeException("Email is already taken");
+            }
+            current.setEmail(updatedData.getEmail());
+        }
+        
+        current.setPhoneNumber(updatedData.getPhoneNumber());
+        
+        if (updatedData.getPassword() != null && !updatedData.getPassword().isEmpty()) {
+            current.setPassword(encoder.encode(updatedData.getPassword()));
+        }
+        
+        if (updatedData.getRole() != null && (updatedData.getRole().equalsIgnoreCase("ADMIN") || updatedData.getRole().equalsIgnoreCase("USER"))) {
+            current.setRole(updatedData.getRole().toUpperCase());
+        }
+        
+        return repo.save(current);
+    }
+
+    public String generateTokenForUser(String username) {
+        return jwtService.generateToken(username);
+    }
 }

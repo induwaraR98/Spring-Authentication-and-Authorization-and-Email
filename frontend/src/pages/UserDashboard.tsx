@@ -134,13 +134,19 @@ const UserDashboard: React.FC = () => {
           <p className="text-sm text-slate-400">Manage your ticket bookings, favorites, and recommendations</p>
         </div>
 
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/60 border border-slate-900 text-xs">
+        <Link
+          to="/profile"
+          className="flex items-center gap-3 p-4 rounded-2xl bg-slate-950/60 hover:bg-slate-905 border border-slate-900 hover:border-indigo-500/50 text-xs transition-all duration-150"
+          title="Edit Profile Settings"
+        >
           <User className="w-5 h-5 text-indigo-400 shrink-0" />
           <div>
-            <p className="font-bold text-slate-300">{user?.username}</p>
+            <p className="font-bold text-slate-300 flex items-center gap-1">
+              {user?.username} <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            </p>
             <p className="text-slate-500">{user?.email}</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {error && (

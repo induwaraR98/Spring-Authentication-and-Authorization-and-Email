@@ -143,12 +143,21 @@ const AdminDashboard: React.FC = () => {
           >
             <Download className="w-4 h-4 text-cyan-400" /> Reports
           </Link>
+          <Link
+            to="/admin/users"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-xs rounded-xl transition-all"
+          >
+            <Users className="w-4 h-4 text-emerald-400" /> Users
+          </Link>
         </div>
       </div>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800/80 flex items-center gap-4">
+        <Link
+          to="/admin/users"
+          className="glass-panel p-5 rounded-2xl border border-slate-800/80 hover:border-indigo-500/50 hover:bg-slate-900/10 flex items-center gap-4 transition-all"
+        >
           <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl border border-indigo-500/20">
             <Users className="w-6 h-6" />
           </div>
@@ -156,7 +165,7 @@ const AdminDashboard: React.FC = () => {
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Total Users</p>
             <p className="text-2xl font-bold text-white mt-0.5">{stats.totalUsers}</p>
           </div>
-        </div>
+        </Link>
 
         <div className="glass-panel p-5 rounded-2xl border border-slate-800/80 flex items-center gap-4">
           <div className="p-3 bg-cyan-500/10 text-cyan-500 rounded-xl border border-cyan-500/20">

@@ -16,6 +16,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import ManageEvents from './pages/ManageEvents';
 import ManageCategories from './pages/ManageCategories';
 import Reports from './pages/Reports';
+import Profile from './pages/Profile';
+import ManageUsers from './pages/ManageUsers';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -84,6 +86,14 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Admin Protected Routes */}
               <Route
@@ -123,6 +133,14 @@ const App: React.FC = () => {
                 element={
                   <AdminRoute>
                     <Reports />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <ManageUsers />
                   </AdminRoute>
                 }
               />

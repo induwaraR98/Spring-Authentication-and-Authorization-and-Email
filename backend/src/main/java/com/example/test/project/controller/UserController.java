@@ -87,4 +87,59 @@ public class UserController {
         boolean isDeleted = service.deleteUser(id);
         return isDeleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Users updatedData) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentUsername;
+        if (principal instanceof UserDetails) {
+            currentUsername = ((UserDetails) principal).getUsername();
+        } else {
+            currentUsername = principal.toString();
+        }
+        
+        try {
+            Users updatedUser = service.updateProfile(currentUsername, updatedData);
+            
+            String token = service.generateTokenForUser(updatedUser.getUsername());
+            
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("token", token);
+            response.put("username", updatedUser.getUsername());
+            response.put("role", updatedUser.getRole());
+            response.put("email", updatedUser.getEmail());
+            response.put("id", updatedUser.getId());
+            response.put("phoneNumber", updatedUser.getPhoneNumber());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            java.util.Map<String, String> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("error", ex.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> adminUpdateUser(@PathVariable int id, @RequestBody Users updatedData) {
+        try {
+            Users updatedUser = service.adminUpdateUser(id, updatedData);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception ex) {
+            java.util.Map<String, String> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("error", ex.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/admin-create")
+    public ResponseEntity<?> adminCreateUser(@RequestBody Users user) {
+        try {
+            Users registeredUser = service.register(user);
+            return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            java.util.Map<String, String> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("error", ex.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -6,6 +6,7 @@ interface User {
   username: string;
   email: string;
   role: string;
+  phoneNumber?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   login: (credentials: any) => Promise<User>;
   registerUser: (userData: any) => Promise<any>;
   logout: () => void;
+  updateProfile: (updatedData: any) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,8 +76,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const updateProfile = async (updatedData: any): Promise<User> => {
+    try {
+      const response = await api.put('/user/profile', updatedData);
+      const { token: newToken, username, role, email, id, phoneNumber } = response.data;
+      
+      const updatedUser: User = { id, username, email, role, phoneNumber };
+      
+      localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      setToken(newToken);
+      setUser(updatedUser);
+      
+      return updatedUser;
+    } catch (err: any) {
+      throw new Error(err.response?.data?.error || 'Profile update failed. Please try again.');
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, registerUser, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, registerUser, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

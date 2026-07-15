@@ -79,6 +79,15 @@ const Navbar: React.FC = () => {
                   </Link>
                 )}
 
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-1.5 p-2 rounded-xl text-slate-300 hover:bg-slate-800/60 hover:text-white transition-all text-sm"
+                  title="My Profile"
+                >
+                  <User className="w-5 h-5 text-emerald-450" />
+                  <span className="hidden sm:inline font-medium">Profile</span>
+                </Link>
+
                 {/* User Info (Desktop only) */}
                 <div className="hidden lg:flex flex-col text-right">
                   <span className="text-xs font-semibold text-slate-200">{user.username}</span>
