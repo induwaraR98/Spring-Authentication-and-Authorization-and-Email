@@ -27,6 +27,52 @@ const Booking: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Promo Code States
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
+  const [validatingPromo, setValidatingPromo] = useState(false);
+
+  const handleQuantityChange = (newCount: number) => {
+    setSeatCount(newCount);
+    // Reset applied promo to ensure limits and bounds are re-evaluated
+    setAppliedPromo(null);
+    setDiscountAmount(0);
+    setPromoSuccess(null);
+    setPromoError(null);
+    setPromoCodeInput('');
+  };
+
+  const handleApplyPromo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPromoError(null);
+    setPromoSuccess(null);
+    if (!promoCodeInput.trim() || !event) return;
+
+    try {
+      setValidatingPromo(true);
+      const res = await api.post('/api/promos/validate', {
+        code: promoCodeInput.trim().toUpperCase(),
+        eventId: event.id,
+        purchaseAmount: event.ticketPrice * seatCount,
+      });
+
+      if (res.data.valid) {
+        setAppliedPromo(promoCodeInput.trim().toUpperCase());
+        setDiscountAmount(res.data.discountAmount);
+        setPromoSuccess(`Coupon applied! Saved $${res.data.discountAmount.toFixed(2)}`);
+      }
+    } catch (err: any) {
+      setPromoError(err.response?.data?.error || 'Invalid promo code.');
+      setAppliedPromo(null);
+      setDiscountAmount(0);
+    } finally {
+      setValidatingPromo(false);
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -65,7 +111,8 @@ const Booking: React.FC = () => {
     try {
       await api.post('/api/bookings', {
         eventId: Number(id),
-        seatCount
+        seatCount,
+        promoCode: appliedPromo || undefined
       });
       setSuccess(true);
       setTimeout(() => {
@@ -165,7 +212,7 @@ const Booking: React.FC = () => {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setSeatCount(prev => Math.max(1, prev - 1))}
+                  onClick={() => handleQuantityChange(Math.max(1, seatCount - 1))}
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-bold hover:bg-slate-800 active:scale-95 transition-all"
                 >
                   -
@@ -173,12 +220,53 @@ const Booking: React.FC = () => {
                 <span className="text-base font-bold text-slate-100 w-6 text-center">{seatCount}</span>
                 <button
                   type="button"
-                  onClick={() => setSeatCount(prev => Math.min(event.availableSeats, prev + 1))}
+                  onClick={() => handleQuantityChange(Math.min(event.availableSeats, seatCount + 1))}
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-bold hover:bg-slate-800 active:scale-95 transition-all"
                 >
                   +
                 </button>
               </div>
+            </div>
+
+            {/* Promo Code Fields */}
+            <div className="space-y-2 border-t border-slate-800/60 pt-4">
+              <label className="text-xs font-bold text-slate-300 block">Promo / Discount Campaign Coupon</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. SUMMER50"
+                  value={promoCodeInput}
+                  onChange={(e) => setPromoCodeInput(e.target.value)}
+                  disabled={!!appliedPromo}
+                  className="bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none flex-grow uppercase font-mono tracking-wider"
+                />
+                {appliedPromo ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppliedPromo(null);
+                      setDiscountAmount(0);
+                      setPromoSuccess(null);
+                      setPromoCodeInput('');
+                    }}
+                    className="px-3.5 bg-rose-955/20 hover:bg-rose-955/40 text-rose-400 border border-rose-900/30 font-bold text-xs rounded-xl transition-all"
+                  >
+                    Clear
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={validatingPromo}
+                    className="px-4 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-200 font-bold text-xs rounded-xl transition-all"
+                  >
+                    {validatingPromo ? 'Validating...' : 'Apply'}
+                  </button>
+                )}
+              </div>
+
+              {promoSuccess && <p className="text-[10px] font-bold text-emerald-400">{promoSuccess}</p>}
+              {promoError && <p className="text-[10px] font-bold text-rose-450">{promoError}</p>}
             </div>
 
             {/* Calculations Breakdown */}
@@ -187,13 +275,19 @@ const Booking: React.FC = () => {
                 <span>Tickets:</span>
                 <span>{seatCount} x ${event.ticketPrice.toFixed(2)}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-450 font-bold">
+                  <span>Campaign Discount:</span>
+                  <span>-${discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-slate-400">
                 <span>Service Fee:</span>
                 <span>$0.00</span>
               </div>
-              <div className="flex justify-between text-sm font-bold text-slate-200 pt-2 border-t border-slate-900">
-                <span>Total:</span>
-                <span className="text-indigo-400">${totalPrice.toFixed(2)}</span>
+              <div className="flex justify-between text-sm font-bold text-slate-205 pt-2 border-t border-slate-900">
+                <span>Total Amount:</span>
+                <span className="text-indigo-400">${(totalPrice - discountAmount).toFixed(2)}</span>
               </div>
             </div>
 

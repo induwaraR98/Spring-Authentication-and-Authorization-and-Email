@@ -34,8 +34,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/user/login", "/user/register").permitAll()
                         .requestMatchers("/user/profile").authenticated()
+                        .requestMatchers("/api/staff-portal/**").hasAnyRole("EVENT_STAFF", "ADMIN")
                         .requestMatchers("/user/**").hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events/**", "/api/categories/**", "/api/reviews/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events/**", "/api/categories/**", "/api/reviews/**", "/api/speakers/**").permitAll()
                         .requestMatchers("/email/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/events/**", "/api/categories/**").hasRole("ADMIN")
@@ -52,10 +53,9 @@ public class SecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-        config.setAllowedOrigins(java.util.List.of(
-                "http://localhost:5173", "http://127.0.0.1:5173",
-                "http://localhost:5174", "http://127.0.0.1:5174",
-                "http://localhost:5175", "http://127.0.0.1:5175"
+        config.setAllowedOriginPatterns(java.util.List.of(
+                "http://localhost:[*]",
+                "http://127.0.0.1:[*]"
         ));
         config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type", "Cache-Control", "X-Requested-With"));

@@ -4,6 +4,7 @@ import com.example.test.project.model.Booking;
 import com.example.test.project.model.Event;
 import com.example.test.project.model.Category;
 import com.example.test.project.model.Users;
+import com.example.test.project.model.PromoUsage;
 import com.example.test.project.repo.BookingRepo;
 import com.example.test.project.repo.EventRepo;
 import com.example.test.project.repo.CategoryRepo;
@@ -133,6 +134,102 @@ public class ReportService {
             }
 
             // Auto-size columns
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
+    }
+
+    public byte[] generatePromoReportPdf(List<PromoUsage> usages) {
+        Document document = new Document();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, Color.DARK_GRAY);
+            Paragraph title = new Paragraph("PROMO CODES CAMPAIGNS USAGE REPORT", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            PdfPTable table = new PdfPTable(6);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{1.5f, 1.5f, 2f, 1.2f, 1.2f, 2.5f});
+
+            // Headers
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
+            String[] headers = {"Promo Code", "User", "Event Title", "Discount", "Booking ID", "Used Date"};
+            for (String h : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
+                cell.setBackgroundColor(new Color(39, 174, 96)); // Green
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(6);
+                table.addCell(cell);
+            }
+
+            Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 9, Color.BLACK);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            for (PromoUsage u : usages) {
+                table.addCell(new PdfPCell(new Phrase(u.getPromoCode().getCode(), bodyFont)));
+                table.addCell(new PdfPCell(new Phrase(u.getUser().getUsername(), bodyFont)));
+                table.addCell(new PdfPCell(new Phrase(u.getEvent().getTitle(), bodyFont)));
+                table.addCell(new PdfPCell(new Phrase("$" + String.format("%.2f", u.getDiscountGiven()), bodyFont)));
+                table.addCell(new PdfPCell(new Phrase(String.valueOf(u.getBooking().getId()), bodyFont)));
+                table.addCell(new PdfPCell(new Phrase(u.getUsedDate().format(formatter), bodyFont)));
+            }
+
+            document.add(table);
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return out.toByteArray();
+    }
+
+    public byte[] generatePromoReportExcel(List<PromoUsage> usages) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Sheet sheet = workbook.createSheet("Promo Usages Data");
+
+            // Header row
+            Row headerRow = sheet.createRow(0);
+            String[] columns = {"Promo Code", "Campaign Name", "Username", "Email", "Event Title", "Booking ID", "Discount Given", "Used Date"};
+            
+            CellStyle headerStyle = workbook.createCellStyle();
+            org.apache.poi.ss.usermodel.Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            int rowIdx = 1;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            for (PromoUsage u : usages) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(u.getPromoCode().getCode());
+                row.createCell(1).setCellValue(u.getPromoCode().getCampaignName());
+                row.createCell(2).setCellValue(u.getUser().getUsername());
+                row.createCell(3).setCellValue(u.getUser().getEmail() != null ? u.getUser().getEmail() : "N/A");
+                row.createCell(4).setCellValue(u.getEvent().getTitle());
+                row.createCell(5).setCellValue(u.getBooking().getId());
+                row.createCell(6).setCellValue(u.getDiscountGiven());
+                row.createCell(7).setCellValue(u.getUsedDate().format(formatter));
+            }
+
             for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }

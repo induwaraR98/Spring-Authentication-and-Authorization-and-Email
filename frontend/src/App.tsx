@@ -18,6 +18,13 @@ import ManageCategories from './pages/ManageCategories';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import ManageUsers from './pages/ManageUsers';
+import ManagePromos from './pages/ManagePromos';
+import ManageSpeakers from './pages/ManageSpeakers';
+import SpeakerProfile from './pages/SpeakerProfile';
+import ManageStaff from './pages/ManageStaff';
+import StaffConsole from './pages/StaffConsole';
+import ManageAnnouncements from './pages/ManageAnnouncements';
+import NotificationFeed from './pages/NotificationFeed';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -51,6 +58,22 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+// Staff Protected Route Component
+const StaffRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950">
+        <div className="w-8 h-8 border-4 border-indigo-600/30 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  if (!user || (user.role !== 'EVENT_STAFF' && user.role !== 'ADMIN')) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -68,6 +91,7 @@ const App: React.FC = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:id" element={<EventDetails />} />
+              <Route path="/speakers/:id" element={<SpeakerProfile />} />
 
               {/* User Protected Routes */}
               <Route
@@ -92,6 +116,22 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <Profile />
                   </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <NotificationFeed />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/console"
+                element={
+                  <StaffRoute>
+                    <StaffConsole />
+                  </StaffRoute>
                 }
               />
 
@@ -141,6 +181,38 @@ const App: React.FC = () => {
                 element={
                   <AdminRoute>
                     <ManageUsers />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/promos"
+                element={
+                  <AdminRoute>
+                    <ManagePromos />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/speakers"
+                element={
+                  <AdminRoute>
+                    <ManageSpeakers />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/staff"
+                element={
+                  <AdminRoute>
+                    <ManageStaff />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/announcements"
+                element={
+                  <AdminRoute>
+                    <ManageAnnouncements />
                   </AdminRoute>
                 }
               />

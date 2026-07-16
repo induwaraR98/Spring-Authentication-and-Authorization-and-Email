@@ -56,6 +56,16 @@ The Smart Event Management System includes the following modules:
 
 ---
 
+## 🔄 Recent Refinements & Fixes
+
+* **Unified Admin Management Console:** Redesigned the Admin Dashboard links into a stylized grid of large, glassmorphic Control Cards featuring custom background radial glows, hover translations, and detailed helper subtitles to facilitate quick access to Categories, Users, Promos, Speakers, Staff, and Reports.
+* **Dynamic CORS Allowed Port Patterns:** Configured backend `SecurityConfig` to support localhost dynamic wildcard ports (`http://localhost:[*]` & `http://127.0.0.1:[*]`). This prevents API request blocks when the frontend Vite dev server shifts dynamically (e.g. running on port `5180`).
+* **Long Form Scrollable Modals:** Fixed viewport cutoffs in large administrative overlays (`ManageSpeakers`, `ManageStaff`, `ManagePromos`, `ManageAnnouncements`) by shifting flex layout constraints to `items-start`, ensuring fields are fully scrollable.
+* **Staff Console Navigation Crash Fix:** Properly imported the routing `Link` inside `StaffConsole.tsx` to fix a JavaScript runtime `ReferenceError` exception, allowing unauthorized visits to fall back gracefully to a stylized "Access Denied" page.
+* **Lucide v1.x Brand Icon Compilation Support:** Addressed compilation crashes caused by Lucide-React v1.0.0's deprecation/removal of brand assets by declaring self-contained inline SVG structures for LinkedIn, Twitter, and Instagram icons.
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Prerequisite: PostgreSQL Setup

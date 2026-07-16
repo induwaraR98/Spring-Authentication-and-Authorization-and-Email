@@ -49,6 +49,26 @@ const Navbar: React.FC = () => {
               >
                 Browse Events
               </Link>
+              {user && (
+                <Link
+                  to="/notifications"
+                  className={`text-sm font-medium transition-colors duration-200 ${
+                    isActive('/notifications') ? 'text-indigo-400 font-semibold' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  Announcements
+                </Link>
+              )}
+              {user && (user.role === 'EVENT_STAFF' || user.role === 'ADMIN') && (
+                <Link
+                  to="/staff/console"
+                  className={`text-sm font-medium transition-colors duration-200 ${
+                    isActive('/staff/console') ? 'text-indigo-400 font-semibold' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  Staff Console
+                </Link>
+              )}
             </div>
           </div>
 

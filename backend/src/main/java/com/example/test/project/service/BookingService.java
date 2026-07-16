@@ -33,8 +33,16 @@ public class BookingService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private PromoService promoService;
+
     @Transactional
     public synchronized Booking createBooking(Users user, int eventId, int seatCount) {
+        return createBooking(user, eventId, seatCount, null);
+    }
+
+    @Transactional
+    public synchronized Booking createBooking(Users user, int eventId, int seatCount, String promoCode) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
@@ -54,14 +62,34 @@ public class BookingService {
         event.setAvailableSeats(event.getAvailableSeats() - seatCount);
         eventRepo.save(event);
 
+        // Calculate pricing
+        double baseTotal = seatCount * event.getTicketPrice();
+        double discount = 0.0;
+        
+        if (promoCode != null && !promoCode.trim().isEmpty()) {
+            try {
+                discount = promoService.validateAndCalculateDiscount(promoCode, eventId, baseTotal, user.getUsername());
+            } catch (Exception e) {
+                // If invalid promo, rollback seat reservation and throw exception to user
+                event.setAvailableSeats(event.getAvailableSeats() + seatCount);
+                eventRepo.save(event);
+                throw new RuntimeException("Promo validation error: " + e.getMessage());
+            }
+        }
+
         // Create booking
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setEvent(event);
         booking.setSeatCount(seatCount);
-        booking.setTotalPrice(seatCount * event.getTicketPrice());
+        booking.setTotalPrice(baseTotal - discount);
         booking.setStatus("BOOKED");
         booking = bookingRepo.save(booking);
+
+        // Log usage if applicable
+        if (promoCode != null && !promoCode.trim().isEmpty() && discount > 0) {
+            promoService.logPromoUsage(promoCode, booking, discount, user);
+        }
 
         // Generate ticket
         Ticket ticket = ticketService.generateTicket(booking);
@@ -70,7 +98,7 @@ public class BookingService {
         byte[] pdfBytes = ticketService.generateTicketPdfBytes(ticket);
 
         // Send notification
-        notificationService.createNotification(user, "Booking confirmed for " + event.getTitle() + " (" + seatCount + " tickets)");
+        notificationService.createNotification(user, "Booking confirmed for " + event.getTitle() + " (" + seatCount + " tickets). Discount applied: $" + String.format("%.2f", discount));
 
         // Send email confirmation
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
@@ -83,19 +111,18 @@ public class BookingService {
                 "  <li><b>Date:</b> %s</li>" +
                 "  <li><b>Time:</b> %s</li>" +
                 "  <li><b>Seats:</b> %d</li>" +
-                "  <li><b>Total Price:</b> $%.2f</li>" +
+                "  <li><b>Total Price:</b> $%.2f (Promo Discount: $%.2f Applied)</li>" +
                 "  <li><b>Ticket Number:</b> %s</li>" +
                 "</ul>" +
                 "<p>Please find your entry ticket PDF attached to this email. Present the QR code on the ticket at the gate.</p>" +
                 "<p>Best regards,<br/>Smart Event Management System Team</p>",
                 user.getUsername(), event.getTitle(), event.getVenue(), event.getDate().toString(), 
-                event.getTime().toString(), seatCount, booking.getTotalPrice(), ticket.getTicketNumber()
+                event.getTime().toString(), seatCount, booking.getTotalPrice(), discount, ticket.getTicketNumber()
             );
             
             try {
                 emailService.sendEmailWithAttachment(user.getEmail(), subject, htmlContent, "Ticket-" + ticket.getTicketNumber() + ".pdf", pdfBytes);
             } catch (Exception e) {
-                // Log and continue, we don't want to fail the transaction just because email server is down
                 System.err.println("Failed to send booking email: " + e.getMessage());
             }
         }

@@ -47,12 +47,14 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<?> bookTickets(@RequestBody Map<String, Integer> request) {
+    public ResponseEntity<?> bookTickets(@RequestBody Map<String, Object> request) {
         try {
             Users user = getCurrentUser();
-            int eventId = request.get("eventId");
-            int seatCount = request.get("seatCount");
-            Booking booking = bookingService.createBooking(user, eventId, seatCount);
+            int eventId = Integer.parseInt(request.get("eventId").toString());
+            int seatCount = Integer.parseInt(request.get("seatCount").toString());
+            String promoCode = request.get("promoCode") != null ? request.get("promoCode").toString() : null;
+            
+            Booking booking = bookingService.createBooking(user, eventId, seatCount, promoCode);
             return new ResponseEntity<>(booking, HttpStatus.CREATED);
         } catch (Exception ex) {
             Map<String, String> response = new HashMap<>();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Calendar, Ticket, DollarSign, Plus, Settings, BarChart2, Download, Trash2, Edit2, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Calendar, Ticket, DollarSign, Plus, Settings, BarChart2, Download, Trash2, Edit2, AlertCircle, CheckCircle, XCircle, Tag, Mic, Megaphone, Shield } from 'lucide-react';
 import api from '../utils/api';
 
 interface DashboardStats {
@@ -117,40 +117,143 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
-      {/* Top Banner and Quick Links */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-900 pb-6">
+      {/* Top Banner */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-905 pb-6">
         <div>
           <h1 className="text-3xl font-extrabold font-outfit text-white">Admin Console</h1>
           <p className="text-sm text-slate-400">Overview of users, registrations, events, bookings, and revenue</p>
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+      {/* Admin Control Center Section */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <Settings className="w-5 h-5 text-indigo-400" />
+          <h2 className="text-lg font-bold font-outfit text-white">Management Console</h2>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          {/* Create Event Card */}
           <Link
             to="/admin/events/new"
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-indigo-500/50 hover:bg-indigo-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 group relative overflow-hidden"
           >
-            <Plus className="w-4 h-4" /> Create Event
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-indigo-600/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-indigo-500/10 text-indigo-400 group-hover:text-indigo-300 rounded-xl border border-indigo-500/20 w-fit transition-all duration-200">
+              <Plus className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Create Event</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Generate and configure new event bookings</p>
+            </div>
           </Link>
+
+          {/* Categories Card */}
           <Link
             to="/admin/categories"
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-xs rounded-xl transition-all"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-purple-500/50 hover:bg-purple-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/5 group relative overflow-hidden"
           >
-            <Settings className="w-4 h-4 text-indigo-400" /> Categories
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-purple-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-purple-500/10 text-purple-400 group-hover:text-purple-300 rounded-xl border border-purple-500/20 w-fit transition-all duration-200">
+              <Tag className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Categories</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Organize dynamic event taxonomies</p>
+            </div>
           </Link>
+
+          {/* Reports Card */}
           <Link
             to="/admin/reports"
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-xs rounded-xl transition-all"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-cyan-500/50 hover:bg-cyan-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/5 group relative overflow-hidden"
           >
-            <Download className="w-4 h-4 text-cyan-400" /> Reports
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-cyan-500/10 text-cyan-400 group-hover:text-cyan-300 rounded-xl border border-cyan-500/20 w-fit transition-all duration-200">
+              <Download className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">System Reports</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Export database tables and csv statistics</p>
+            </div>
           </Link>
+
+          {/* Users Card */}
           <Link
             to="/admin/users"
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-xs rounded-xl transition-all"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-emerald-500/50 hover:bg-emerald-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5 group relative overflow-hidden"
           >
-            <Users className="w-4 h-4 text-emerald-400" /> Users
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-emerald-500/10 text-emerald-400 group-hover:text-emerald-300 rounded-xl border border-emerald-500/20 w-fit transition-all duration-200">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Users Directory</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Manage registered accounts and roles</p>
+            </div>
+          </Link>
+
+          {/* Promos Card */}
+          <Link
+            to="/admin/promos"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-amber-500/50 hover:bg-amber-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5 group relative overflow-hidden"
+          >
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-amber-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-amber-500/10 text-amber-400 group-hover:text-amber-300 rounded-xl border border-amber-500/20 w-fit transition-all duration-200">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Promo Campaigns</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Create and monitor discount coupon codes</p>
+            </div>
+          </Link>
+
+          {/* Speakers Card */}
+          <Link
+            to="/admin/speakers"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-fuchsia-500/50 hover:bg-fuchsia-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-fuchsia-500/5 group relative overflow-hidden"
+          >
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-fuchsia-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-fuchsia-500/10 text-fuchsia-400 group-hover:text-fuchsia-300 rounded-xl border border-fuchsia-500/20 w-fit transition-all duration-200">
+              <Mic className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Speaker Roster</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Onboard presenters, hosts and bios</p>
+            </div>
+          </Link>
+
+          {/* Staff Card */}
+          <Link
+            to="/admin/staff"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-rose-500/50 hover:bg-rose-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/5 group relative overflow-hidden"
+          >
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-rose-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-rose-500/10 text-rose-450 group-hover:text-rose-350 rounded-xl border border-rose-500/20 w-fit transition-all duration-200">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Staff Directory</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Manage crew shift duty allocations</p>
+            </div>
+          </Link>
+
+          {/* Announcements Card */}
+          <Link
+            to="/admin/announcements"
+            className="glass-panel p-5 rounded-2xl border border-slate-850 bg-slate-900/20 hover:border-lime-500/50 hover:bg-lime-950/5 flex flex-col justify-between h-40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-lime-500/5 group relative overflow-hidden"
+          >
+            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-lime-500/10 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+            <div className="p-3 bg-lime-500/10 text-lime-400 group-hover:text-lime-300 rounded-xl border border-lime-500/20 w-fit transition-all duration-200">
+              <Megaphone className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold font-outfit text-slate-200 group-hover:text-white transition-colors">Broadcasts</h3>
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">Send emails and push alerts to users</p>
+            </div>
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

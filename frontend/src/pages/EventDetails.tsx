@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, User, Ticket, Star, Heart, ArrowLeft, Send } from 'lucide-react';
+import { Calendar, MapPin, User, Ticket, Star, Heart, ArrowLeft, Send, Mic, Clock } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { getCleanImageUrl } from '../utils/image';
@@ -37,6 +37,7 @@ const EventDetails: React.FC = () => {
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [speakers, setSpeakers] = useState<any[]>([]);
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,12 +54,14 @@ const EventDetails: React.FC = () => {
   const fetchEventDetails = async () => {
     setLoading(true);
     try {
-      const [eventRes, reviewsRes] = await Promise.all([
+      const [eventRes, reviewsRes, scheduleRes] = await Promise.all([
         api.get(`/api/events/${id}`),
-        api.get(`/api/reviews/event/${id}`)
+        api.get(`/api/reviews/event/${id}`),
+        api.get(`/api/events/${id}/schedule`)
       ]);
       setEvent(eventRes.data);
       setReviews(reviewsRes.data);
+      setSpeakers(scheduleRes.data || []);
 
       if (user) {
         // Check favorite status
@@ -207,6 +210,54 @@ const EventDetails: React.FC = () => {
           <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-6">
             <h2 className="font-bold text-xl text-white font-outfit">Event Details</h2>
             <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">{event.description}</p>
+          </div>
+
+          {/* Event Schedule & Speakers Program */}
+          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-6">
+            <h2 className="font-bold text-xl text-white font-outfit flex items-center gap-2">
+              <Mic className="w-5 h-5 text-indigo-400" /> Event Schedule & Guest Speakers
+            </h2>
+            
+            {speakers.length === 0 ? (
+              <p className="text-slate-500 text-xs italic py-2">No guest speakers scheduled for this session yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {speakers
+                  .sort((a, b) => a.speakingOrder - b.speakingOrder)
+                  .map((sp) => (
+                    <div key={sp.id} className="p-4 bg-slate-950/60 border border-slate-900 rounded-2xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                      <div className="flex gap-4 items-center">
+                        <img
+                          src={sp.profilePhoto || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80'}
+                          alt={sp.fullName}
+                          className="w-12 h-12 rounded-xl object-cover border border-slate-800 bg-slate-900 shrink-0"
+                        />
+                        <div>
+                          <Link to={`/speakers/${sp.id}`} className="font-bold text-sm text-slate-200 hover:text-indigo-400 transition-colors">
+                            {sp.fullName}
+                          </Link>
+                          <p className="text-[10px] text-slate-500 capitalize">{sp.designation} at {sp.organization || 'Freelance'}</p>
+                          {sp.sessionTitle && (
+                            <p className="text-xs text-slate-300 font-medium font-outfit mt-1 italic">"{sp.sessionTitle}"</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {sp.sessionStartTime && (
+                        <div className="flex sm:flex-col items-center sm:items-end gap-1.5 sm:gap-0.5 text-[10px] text-slate-500 font-mono self-stretch sm:self-auto justify-between border-t sm:border-t-0 border-slate-900/60 pt-2 sm:pt-0 shrink-0">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                            {sp.sessionStartTime.substring(0, 5)} - {sp.sessionEndTime?.substring(0, 5)}
+                          </span>
+                          {sp.sessionHall && (
+                            <span className="text-[9px] font-bold text-slate-650 block uppercase">Hall: {sp.sessionHall}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Reviews Section */}
